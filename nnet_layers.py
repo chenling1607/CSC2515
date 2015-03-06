@@ -1,7 +1,7 @@
 # Code by Navdeep Jaitly, 2013
 # Email: ndjaitly@gmail.com
 
-from numpy import sqrt, isnan, Inf, dot, zeros, exp, log, sum, transpose
+from numpy import sqrt, isnan, Inf, dot, zeros, exp, log, sum, transpose, ones
 from numpy.random import randn
 
 SIGMOID_LAYER = 0
@@ -10,8 +10,6 @@ SOFTMAX_LAYER = 1
 def sigmoid(x):
     return 1.0 / (1.0 + exp(-x))
 
-def sigmoid_prime(x):
-    return sigmoid(x) * (1.0 - sigmoid(x))
 
 class layer_definition(object):
     def __init__(self, name, layer_type, input_dim, num_units, wt_sigma):
@@ -64,7 +62,12 @@ class layer(object):
     def apply_gradients(self, momentum, eps, l2=.0001):
         """ NEED TO IMPLEMENT 
         """
-        raise Exception, "Unimplemented functionality"
+        
+        self._wts_inc = momentum * self._wts_inc - eps * self._wts_grad
+        self._b_inc = momentum * self._b_inc - eps * self._b_grad
+
+        self._wts += self._wts_inc
+        self._b += self._b_inc
 
     def back_prop(self, act_grad, data):
         ''' 
@@ -72,7 +75,14 @@ class layer(object):
         Feel free to add member variables.
         back prop activation grad, and compute gradients. 
         '''
-        raise Exception, "Unimplemented functionality"
+        
+        input_grad = dot(self._wts, act_grad)
+
+        self._wts_grad = dot(act_grad, transpose(data)) / act_grad.shape[1]
+        self._wts_grad = transpose(self._wts_grad)
+
+        self._b_grad = dot(act_grad, ones((act_grad.shape[1],1))) / act_grad.shape[1]
+
         return input_grad
  
 
@@ -96,7 +106,7 @@ class sigmoid_layer(layer):
     def compute_act_grad_from_output_grad(self, output, output_grad):
         """ NEED TO IMPLEMENT 
         """
-        
+        act_grad = output_grad * (1.0 - output) * output
         return act_grad
 
  
@@ -112,29 +122,25 @@ class softmax_layer(layer):
 
         activation = dot(transpose(self._wts), data) + bias
 
-        probs = sigmoid(activation)
+        probs = exp(activation)
         for j in range(probs.shape[1]):
             s = 0
-            #for i in range(probs.shape[0]):
-            #    s += probs[i][j]
             s = sum(probs[:,j])
-            for i in range(probs.shape[0]):
-                probs[i][j] /= s
+            probs[:,j] /= s
 
         return probs
 
     def compute_act_gradients_from_targets(self, targets, output):
         """ NEED TO IMPLEMENT 
         """
-        raise Exception, "Unimplemented functionality"
-        return act_grad
+        act_grad = output - targets
+        return act_grad  # 44X1000
 
 
     @staticmethod 
     def compute_accuraccy(probs, label_mat):
         num_correct = sum(probs.argmax(axis=0) == label_mat.argmax(axis=0))
         log_probs = sum(log(probs) * label_mat)
-        print (probs.shape, label_mat.shape)
         return num_correct, log_probs
 
 def create_empty_nnet_layer(name, layer_type):

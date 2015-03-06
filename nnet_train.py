@@ -39,7 +39,8 @@ class nn(object):
 
     def load(self, file_name):
         params_dict = scipy.io.loadmat(file_name)
-        self._lst_layer_type, self._lst_num_hid, self._data_dim = \
+        self._lst_layers_name, self._lst_layer_type, self._lst_num_hid, self._data_dim = \
+                                            params_dict['lst_layer_names'], \
                                            params_dict['lst_layer_type'], \
                                                params_dict['lst_num_hid'], \
                                                    params_dict['data_dim']
@@ -47,8 +48,9 @@ class nn(object):
         if not hasattr(self, '_lst_layers'):
             logging.info("Creating new layers from parameters in file: %s"%file_name)
             self._lst_layers = [] 
-            for (layer_name, layer_type) in zip(params_dict['lst_layer_names'],
-                                                self._lst_layer_type):
+            for (layer_name, layer_type) in zip(self._lst_layers_name,
+                                                self._lst_layer_type[0]):
+                print layer_name, layer_type
                 layer = create_empty_nnet_layer(layer_name, layer_type)
                 layer.copy_params_from_dict(params_dict)
                 self._lst_layers.append(layer)
@@ -99,18 +101,21 @@ class nn(object):
         """
         NEED TO IMPLEMENT 
         """
-        print len(self._lst_layers)
-        gradient = [targets]
-        gradient.append()
-        for i in range(len(self._lst_layers)):
-            gradient.append(self._lst_layers[-i-1].back_prop(gradient[i],lst_layer_outputs[-i-2]))
+        gradient = targets.copy()
 
+        for i in range(len(self._lst_layers)):
+            if self._lst_layers[-i-1].__class__.__name__ is 'sigmoid_layer':
+                act_grad = self._lst_layers[-i-1].compute_act_grad_from_output_grad(lst_layer_outputs[-i-1], gradient)
+            elif self._lst_layers[-i-1].__class__.__name__ is 'softmax_layer':
+                act_grad = self._lst_layers[-i-1].compute_act_gradients_from_targets(gradient, lst_layer_outputs[-i-1])
+            gradient = self._lst_layers[-i-1].back_prop(act_grad, lst_layer_outputs[-i-2])
 
     def apply_gradients(self, eps, momentum, l2 = 0):
         """
         NEED TO IMPLEMENT 
         """
-        raise Exception, "Unimplemented functionality"
+        for i in range(len(self._lst_layers)):
+            self._lst_layers[i].apply_gradients(momentum, eps, l2)
 
 
     def create_predictions(self, data_src):
@@ -181,13 +186,12 @@ class nn(object):
             batch += 1
             num_pts += batch_size
             lst_layer_outputs = self.fwd_prop(data)
-            print lst_layer_outputs[-1].shape
 
             num_correct, log_prob = self._lst_layers[-1].compute_accuraccy(\
                                             lst_layer_outputs[-1], label_mat)
             classif_err_sum += (data.shape[1] - num_correct)
             lg_p_sum += log_prob
-            print (classif_err_sum, log_prob)
+            #print (classif_err_sum, log_prob)
 
             self.back_prop(lst_layer_outputs, data, label_mat)
             self.apply_gradients(eps, momentum, l2)

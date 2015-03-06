@@ -1,0 +1,49 @@
+K is 1 Metric is  1
+Test Error:  0.665
+K is 1 Metric is  2
+Test Error:  0.667272727273
+K is 3 Metric is  1
+Test Error:  0.653181818182
+K is 3 Metric is  2
+Test Error:  0.653181818182
+K is 5 Metric is  1
+Test Error:  0.636818181818
+K is 5 Metric is  2
+Test Error:  0.625
+
+
+Corrupted:
+K is 1 Metric is  1
+Test Error:  0.689545454545
+
+K is 1 Metric is  2
+Test Error:  0.692272727273
+
+K is 3 Metric is  1
+Test Error:  0.680909090909
+
+K is 3 Metric is  2
+Test Error:  0.678636363636
+
+K is 5 Metric is  1
+Test Error:  0.646363636364
+
+K is 5 Metric is  2
+Test Error:  0.64
+
+
+radius = 1.2
+Metric is  1
+Test Error:  0.66
+                                                                                   
+Metric is  2
+Test Error:  0.644090909091
+
+radius = 1.1
+K is 1 Metric is  1
+Test Error:  0.680454545455
+                                           
+                                           
+K is 1 Metric is  2
+Test Error:  0.680909090909
+

@@ -8,16 +8,16 @@ from numpy import zeros
 parser = argparse.ArgumentParser()
 parser.add_argument('--num_frames_per_pt', type = int, 
                     default = 15, help='# of frames per pt')
-parser.add_argument('db_path', help='Path to validation database')
-parser.add_argument('model_file', type=str, 
+parser.add_argument('--db_path', default = '/Users/chenling/Desktop/A2/data/test.mat', help='Path to validation database')
+parser.add_argument('--model_file', type=str, default = '/Users/chenling/Desktop/A2/code_python/nn.mat', 
                      help='file with neural network parameters')
-parser.add_argument('predictions_file', type=str, help='output folder')
+parser.add_argument('--predictions_file', default = '/Users/chenling/Desktop/A2/code_python/predictions.mat', type=str, help='output folder')
 
 arguments = parser.parse_args()
 data_src = speech_data.speech_data(arguments.db_path, 
                                    arguments.num_frames_per_pt)
-#data_src.normalize_data()
- 
+data_src.normalize_data()
+
 nnet = nnet_train.nn()
 nnet.load(arguments.model_file)
 
